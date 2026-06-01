@@ -844,7 +844,9 @@ RESPONSIVE
 
         flex-direction:column;
     }
-html {
+
+    
+}html {
     scroll-behavior: smooth;
 }
 
@@ -891,6 +893,4 @@ html {
     font-size: 0.7rem;
     letter-spacing: 3px;
     opacity: 0.5;
-}
-    
 }

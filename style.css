@@ -845,6 +845,73 @@ RESPONSIVE
         flex-direction:column;
     }
 
+/* =====================================
+   TFvsWU RELEASE TRANSMISSION
+===================================== */
+
+.release-alert {
+    text-align: center;
+    width: fit-content;
+    max-width: 90%;
+    margin: 25px auto 10px;
+    padding: 16px 24px;
+    text-align: center;
+    border: 1px solid rgba(177, 100, 255, 0.65);
+    background: rgba(35, 15, 55, 0.55);
+    box-shadow: 0 0 18px rgba(160, 70, 255, 0.18);
+    animation: releaseGlow 2s ease-in-out infinite alternate;
+}
+
+.release-label {
+    display: block;
+    color: #bd8aff;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+}
+
+.release-title {
+    color: #fff;
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.release-date {
+    color: #ffe36a;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    line-height: 1.8;
+    margin-top: 10px;
+}
+
+.release-video {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 16 / 9;
+    margin: 18px auto 0;
+    border: 1px solid rgba(105, 216, 255, 0.45);
+    box-shadow: 0 0 18px rgba(105, 216, 255, 0.2);
+}
+
+.release-video iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+@keyframes releaseGlow {
+    from {
+        box-shadow: 0 0 8px rgba(160, 70, 255, 0.15);
+    }
+    to {
+        box-shadow: 0 0 24px rgba(160, 70, 255, 0.5);
+    }
+}
 
 /* =====================================
    TFvsWU SOCIAL UPLINK

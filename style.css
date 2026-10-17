@@ -849,6 +849,7 @@ RESPONSIVE
 ===================================== */
 
 .release-alert {
+    text-align: center;
     width: fit-content;
     max-width: 90%;
     margin: 25px auto 10px;
@@ -885,6 +886,8 @@ RESPONSIVE
 }
 
 .release-video {
+    margin-left: auto;
+    margin-right: auto;
     width: 100%;
     max-width: 560px;
     aspect-ratio: 16 / 9;

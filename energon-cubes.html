@@ -394,7 +394,7 @@ function showTransition(index){
 }
 function swordShuffle(){
  // SWORD STYLE rearranges every regular block and Energon Cube across the whole board.
- playSfx(Math.random()<0.5?"SWORDSTYLE":"SWORDSTYLE1");
+ playSfx(Math.random()<0.5?"SWORDSTYLE1":"SWORDSTYLE2");
  // Enemy hazard blocks (values 5-8) stay locked in their original cells.
  const movable=[];
  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]<5)movable.push([r,c]);
@@ -531,31 +531,38 @@ function endGame(){
 }
 async function startGame(){
  stopBeat();rotationSoundIndex=0;
- const beginLevelOneAudio=()=>startLevelAudio(0);
  playerName=cleanName($("player-name").value);$("player-name").value=playerName;
  try{localStorage.setItem("tfvswuEnergonPlayer",playerName);best=Number(localStorage.getItem(bestKey(playerName))||0)}catch(e){best=0}
  freshGrid();score=created=collected=locked=fall=0;started=true;ended=paused=processing=won=chaos=false;intermission=true;
  currentLevel=0;nextSwordIndex=0;nextTransformIndex=0;attackCount=0;piece=null;nextPiece=randomPiece();
- if(soundsMuted)beginLevelOneAudio();else playSfx("ENERGONCUBES1","wav",beginLevelOneAudio);
- $("game-over").classList.remove("show");$("win-screen").classList.remove("show");$("start-screen").classList.remove("show");
+ $("game-over").classList.remove("show");$("win-screen").classList.remove("show");
  $("btn-pause").textContent="Ⅱ PAUSE";$("sword-slash").classList.remove("show");$("transform-overlay").classList.remove("show");
- // Opening title card: the cassette war transmission begins before the first piece drops.
- $("transition-kicker").textContent="TFvsWU ARCADE SYSTEM";
- $("transition-name").textContent="STEELJAW BEGIN";
- $("transition-sub").textContent="LEVEL 1 // CASSETTE WARZ";
- $("transition-status").textContent="TRANSMISSION STARTING";
- $("transition-name").style.color="#FFF1D8";
- $("transition-name").style.textShadow="0 0 8px #FFF1D8,0 0 22px #FF8A32";
- const box=$("level-transition");box.style.borderColor="#FF8A32";
- box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
- drawNext();hud();setMessage("STEELJAW BEGIN // TRANSMISSION STARTING");
- await wait(3300);
- box.classList.remove("show");
- $("transition-kicker").textContent="INCOMING TRANSMISSION";
- $("transition-status").textContent="LEVEL UNLOCKED";
- intermission=false;
- spawn();setMessage("TRANSMISSION ACTIVE // STEELJAW DEPLOYED");
+ drawNext();hud();setMessage("ENERGON CUBES // INITIALIZING TRANSMISSION");
+ // Play ENERGONCUBES1 completely before displaying the Steeljaw level-intro screen.
+ const showSteeljawIntro=async()=>{
+  if(!started||ended)return;
+  $("start-screen").classList.remove("show");
+  startLevelAudio(0);
+  $("transition-kicker").textContent="TFvsWU ARCADE SYSTEM";
+  $("transition-name").textContent="STEELJAW BEGIN";
+  $("transition-sub").textContent="LEVEL 1 // CASSETTE WARZ";
+  $("transition-status").textContent="TRANSMISSION STARTING";
+  $("transition-name").style.color="#FFF1D8";
+  $("transition-name").style.textShadow="0 0 8px #FFF1D8,0 0 22px #FF8A32";
+  const box=$("level-transition");box.style.borderColor="#FF8A32";
+  box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
+  setMessage("STEELJAW BEGIN // TRANSMISSION STARTING");
+  await wait(3300);
+  if(!started||ended)return;
+  box.classList.remove("show");
+  $("transition-kicker").textContent="INCOMING TRANSMISSION";
+  $("transition-status").textContent="LEVEL UNLOCKED";
+  intermission=false;
+  spawn();setMessage("TRANSMISSION ACTIVE // STEELJAW DEPLOYED");
+ };
+ if(soundsMuted){showSteeljawIntro()}else{playSfx("ENERGONCUBES1","wav",showSteeljawIntro)}
 }
+
 function continueChaos(){
  intermission=false;chaos=true;currentLevel=3;$("win-screen").classList.remove("show");hud();
  stopBeat();

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ENERGON CUBES | TFvsWU</title>
+<style>
+:root {
+  --bg: #100b18;
+  --panel: #1b1328;
+  --line: #6c5ce7;
+  --gold: #f4c542;
+  --purple: #6b168f;
+  --red: #dc1247;
+  --pink: #ff36c7;
+  --white: #f8f5ff;
+}
+* { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  min-height: 100vh; padding: 12px 10px 18px; overflow-x: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at top, #241337 0%, var(--bg) 68%);
+  color: var(--white); font-family: "Courier New", monospace; touch-action: manipulation;
+}
+header { text-align: center; margin-bottom: 10px; }
+h1 {
+  margin: 0; font-size: clamp(23px, 6vw, 32px); letter-spacing: 2px;
+  color: var(--pink); text-shadow: 0 0 7px var(--pink), 0 0 20px #ff36c777;
+}
+.subtitle { margin-top: 4px; color: #c4b4f7; font-size: 11px; letter-spacing: 1px; }
+.game-shell { width: min(100%, 410px); display: flex; flex-direction: column; gap: 9px; align-items: stretch; }
+.board-layout { display:grid;grid-template-columns:280px 112px;gap:9px;align-items:start;justify-content:center;width:100%; }
+.game-sidebar { display:flex;flex-direction:column;gap:8px;min-width:0;width:112px; }
+.board-wrap { position:relative;min-width:0;width:280px;max-width:100%; }
+
+.hud { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.stat {
+  background: linear-gradient(145deg, #241833, #171020); border: 1px solid #493465;
+  border-radius: 8px; padding: 8px 10px; text-align: center;
+}
+.stat-label { font-size: 10px; color: #b7a5d9; letter-spacing: 1px; }
+.stat-value { margin-top: 3px; font-weight: bold; font-size: 17px; color: var(--gold); overflow-wrap:anywhere; }
+.stat.cubes { border-color: #b52b91; box-shadow: inset 0 0 12px #ff36c711; }
+.stat.cubes .stat-value { color: var(--pink); text-shadow: 0 0 8px #ff36c788; }
+.energon-stats,.next-panel { background:linear-gradient(145deg,#241833,#171020);border:1px solid #71345f;border-radius:8px;padding:7px 10px;text-align:center; }
+.energon-heading { color:var(--pink);font-weight:bold;font-size:12px;letter-spacing:1.5px;text-shadow:0 0 8px #ff36c777; }
+.energon-counts { display:grid;grid-template-columns:1fr;gap:4px;margin-top:6px; }
+.energon-counts div { display:flex;align-items:center;justify-content:space-between;gap:3px;font-size:8px;color:#cbb8dc; }
+.energon-counts strong { color:var(--pink);font-size:17px; }
+.next-panel { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 4px;border-color:#493465; }
+.next-title { color:#c4b4f7;font-weight:bold;letter-spacing:1.5px;font-size:11px; }
+#next-canvas { width:100%;max-width:90px;height:auto;image-rendering:pixelated; }
+.controller-strip { grid-template-columns:repeat(5,minmax(0,1fr)); }
+.pause-btn { border-color:var(--pink);font-size:11px; }
+.board-wrap { position: relative; align-self: center; }
+#game-canvas {
+  display: block; width: min(90vw, 280px); height: auto; aspect-ratio: 1 / 2;
+  background: #0b0711; border: 3px solid var(--line); border-radius: 4px;
+  box-shadow: 0 0 18px #6c5ce755, inset 0 0 20px #000;
+  touch-action: manipulation;
+}
+#message {
+  min-height: 17px; text-align: center; font-size: 11px; color: #f4c7ff;
+  text-shadow: 0 0 8px #ff36c766;
+}
+.controller-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.btn {
+  min-width: 0; height: 52px; border: 1px solid #9d79ff; border-radius: 8px;
+  background: linear-gradient(#2b2040, #1b1328); color: #fff; font: bold 13px "Courier New", monospace;
+  box-shadow: 0 3px 0 #10091a; touch-action: manipulation; cursor: pointer;
+}
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #10091a; background: #49316c; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px 12px; font-size: 10px; color: #c8bddc; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.swatch { width: 10px; height: 10px; display: inline-block; border-radius: 2px; }
+#game-over {
+  position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+  padding: 18px; background: #090510df; text-align: center; border-radius: 3px;
+}
+#game-over.show { display: flex; }
+.over-card { width: 100%; border: 1px solid var(--pink); border-radius: 10px; padding: 18px 12px; background: #1b1026; box-shadow: 0 0 24px #ff36c744; }
+.over-card h2 { margin: 0 0 10px; color: var(--pink); font-size: 22px; }
+.over-card p { font-size: 12px; line-height: 1.6; }
+#restart { width: 100%; margin-top: 8px; border-color: var(--pink); color: white; }
+
+.level-panel { background:linear-gradient(145deg,#241833,#171020);border:1px solid #493465;border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px; }
+.level-top,.level-foot { display:flex;justify-content:space-between;align-items:center;gap:8px; }
+.level-top { color:#b7a5d9;font-size:9px;letter-spacing:1px; }
+#level-name { color:var(--gold);font-size:11px;text-align:right; }
+.level-progress { height:5px;background:#0b0711;border-radius:9px;overflow:hidden;border:1px solid #493465; }
+#level-progress-fill { height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--pink));box-shadow:0 0 8px var(--pink);transition:width .25s; }
+.level-foot { color:#c4b4f7;font-size:9px;letter-spacing:.5px; }
+.screen-overlay { position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(7,3,13,.93);backdrop-filter:blur(5px); }
+.screen-overlay.show { display:flex; }
+.title-card { width:min(100%,340px);max-height:94vh;overflow:auto;border-color:var(--pink);box-shadow:0 0 35px #ff36c755,inset 0 0 22px #ff36c711; }
+.eyebrow { color:#bba8f1;font-size:9px;letter-spacing:1.5px;margin-bottom:10px; }
+.hero-title { font-size:clamp(30px,9vw,42px)!important;line-height:1.02;text-shadow:0 0 10px #ff36c7,0 0 26px #ff36c777;letter-spacing:3px; }
+.hero-copy { color:#f7c9f0;font-weight:bold;letter-spacing:1px; }
+.tape-roster { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 0;color:#f4c542;font-size:10px; }
+.tape-roster span { border:1px solid #493465;background:#100b18;padding:7px 4px;border-radius:4px; }
+.instructions { color:#cbbddd;font-size:10px!important;line-height:1.7!important;border-top:1px solid #493465;border-bottom:1px solid #493465;padding:10px 0; }
+.best-line { color:#cbbddd;font-size:11px!important; }
+.best-line strong { color:var(--gold); }
+.primary-btn { width:100%;margin-top:6px;border-color:var(--pink);background:linear-gradient(#b92b91,#65145a);font-size:13px;box-shadow:0 0 16px #ff36c733; }
+.secondary-btn { width:100%;margin-top:8px;background:transparent;border-color:#6c5ce7; }
+.win-title { color:var(--gold)!important;text-shadow:0 0 10px #f4c542,0 0 26px #f4c54277!important; }
+
+
+.level-transition { position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;background:rgba(8,4,16,.91);opacity:0;visibility:hidden;pointer-events:none;border:2px solid transparent; }
+.level-transition.show { visibility:visible;animation:transmissionReveal 3.2s ease forwards; }
+.transition-kicker { font-size:10px;letter-spacing:2px;color:#d9c7ff; }
+.transition-name { font-size:clamp(23px,7vw,34px);font-weight:bold;letter-spacing:2px;color:#fff;text-shadow:0 0 8px currentColor,0 0 22px currentColor; }
+.transition-sub { font-size:11px;letter-spacing:1px;color:#f4c542; }
+.transition-status { margin-top:8px;padding:7px 12px;border:1px solid #ff36c7;color:#ffb8ee;font-size:10px;letter-spacing:2px; }
+@keyframes transmissionReveal { 0%{opacity:0;transform:scale(1.08);border-color:transparent} 8%{opacity:1;transform:scale(1);border-color:#ff36c7} 88%{opacity:1;border-color:#8955e8} 100%{opacity:0;visibility:hidden;border-color:transparent} }
+.sword-slash { position:absolute;inset:0;z-index:6;overflow:hidden;pointer-events:none;opacity:0;visibility:hidden; }
+
+.transform-overlay { position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;opacity:0;visibility:hidden;background:rgba(9,5,18,.58);border:2px solid #36f0d0; }
+.transform-overlay.show { visibility:visible;animation:transformPulse 1.55s ease-in-out forwards; }
+.transform-overlay span { font-size:clamp(25px,8vw,36px);font-weight:bold;letter-spacing:4px;color:#7ffff0;text-shadow:0 0 8px #36f0d0,0 0 22px #36f0d0; }
+.transform-overlay small { font-size:10px;letter-spacing:1.5px;color:#fff; }
+@keyframes transformPulse { 0%{opacity:0;transform:scale(.97)} 10%,86%{opacity:1;transform:scale(1)} 100%{opacity:0;visibility:hidden;transform:scale(1.02)} }
+
+.sword-slash::before { content:"";position:absolute;left:-35%;top:48%;width:175%;height:9px;transform:rotate(-24deg) translateX(-110%);background:linear-gradient(90deg,transparent,#fff 35%,#fff4a8 55%,#f4c542 68%,transparent);box-shadow:0 0 12px #fff,0 0 28px #f4c542; }
+.sword-slash::after { content:"";position:absolute;inset:0;background:rgba(255,244,168,.13);opacity:0; }
+.sword-slash span { position:absolute;top:42%;left:0;right:0;text-align:center;font-size:12px;font-weight:bold;letter-spacing:2px;color:#fff4a8;text-shadow:0 0 10px #f4c542,0 0 20px #f4c542;opacity:0; }
+.sword-slash.show { visibility:visible;animation:swordFlash 2.6s ease-out forwards; }
+.sword-slash.show::before { animation:swordSweep 1.8s ease-in-out forwards; }
+.sword-slash.show::after { animation:swordGlow 2.1s ease-in-out forwards; }
+.sword-slash.show span { animation:swordWords 2.6s ease-out forwards; }
+@keyframes swordSweep { 0%{transform:rotate(-24deg) translateX(-110%)} 40%{transform:rotate(-24deg) translateX(0)} 75%{transform:rotate(-24deg) translateX(0)} 100%{transform:rotate(-24deg) translateX(115%)} }
+@keyframes swordGlow { 0%,100%{opacity:0} 35%{opacity:1} }
+@keyframes swordWords { 0%,18%{opacity:0;transform:scale(.8)} 30%,82%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.1)} }
+@keyframes swordFlash { 0%{opacity:0} 10%,82%{opacity:1} 100%{opacity:0;visibility:hidden} }
+
+/* Audio controls */
+.audio-controls { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:2px; }
+.audio-controls .btn { min-width:132px; height:36px; padding:7px 10px; font-size:10px; border-color:#6d4b91; }
+.audio-controls .btn[aria-pressed="true"] { border-color:var(--pink); color:#ff9ee9; box-shadow:0 0 8px #ff36c744; }
+.audio-controls .btn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.footer { margin-top: 2px; font-size: 9px; color: #76668f; text-align: center; letter-spacing: 1px; }
+@media (max-width: 410px) {
+  .board-layout { grid-template-columns:minmax(0, 1fr) 98px;gap:6px; }
+  .board-wrap { width:100%; }
+  .game-sidebar { width:98px;gap:6px; }
+  #game-canvas { width:100%; }
+  .stat { padding:7px 4px; }
+  .stat-label { font-size:9px;letter-spacing:.5px; }
+  .stat-value { font-size:15px; }
+  .energon-stats { padding:7px 4px; }
+  .energon-heading { font-size:9px;letter-spacing:.5px; }
+  .next-title { font-size:9px;letter-spacing:.5px; }
+}
+@media (max-height: 700px) {
+  body { justify-content: flex-start; padding-top: 6px; }
+  header { margin-bottom: 5px; }
+  .game-shell { gap: 6px; }
+  .btn { height: 45px; }
+}
+
+/* v11 layout and requested visual updates */
+.board-layout { display:grid; grid-template-columns:minmax(0,280px) 112px; gap:9px; align-items:start; justify-content:center; width:100%; }
+.board-wrap { position:relative; width:280px; max-width:100%; min-width:0; align-self:start; }
+.game-sidebar { display:flex; flex-direction:column; gap:8px; width:112px; min-width:0; }
+#game-canvas { display:block; width:100%; max-width:280px; height:auto; aspect-ratio:1 / 2; }
+.start-title-row { display:flex; align-items:center; justify-content:center; gap:12px; margin:0 auto 8px; }
+.start-title-row .hero-title { margin:0; text-align:left; }
+.start-title-cube { display:inline-block; position:relative; flex:0 0 52px; width:52px; height:52px; border:2px solid #ffc4ff; border-radius:8px; transform:rotate(-8deg); background:linear-gradient(135deg,#ffb2fb,#f044d8 45%,#8b16b6); box-shadow:0 0 14px #f044d8,0 0 30px #f044d899,inset 0 0 12px #fff7; }
+.start-title-cube:before,.start-title-cube:after { content:""; position:absolute; inset:7px; border:1px solid #ffe2ff; transform:rotate(45deg); }
+.start-title-cube:after { inset:14px; border-color:#fff; opacity:.65; }
+.callsign-label { display:block; margin:10px 0 5px; color:var(--gold); font-size:10px; font-weight:bold; letter-spacing:1px; text-align:left; }
+.callsign-input { display:block; width:100%; padding:9px 10px; border:1px solid var(--gold); border-radius:5px; background:#100a18; color:#fff; font:700 13px "Courier New",monospace; letter-spacing:.5px; outline:none; }
+.callsign-input:focus { box-shadow:0 0 0 2px #f4c54244; }
+.callsign-input::placeholder { color:#9e93a8; }
+.legend { display:flex; flex-direction:column; gap:5px; width:100%; margin:8px auto; font-size:8px; line-height:1.4; }
+.legend-line { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 10px; }
+.legend-line span { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.legend-cube { display:inline-block; width:9px; height:9px; border-radius:2px; flex:0 0 9px; }
+.legend-cube.gold{background:#F4C542}.legend-cube.purple{background:#6B168F}.legend-cube.red{background:#DC1247}.legend-cube.pink{background:#FF36C7;box-shadow:0 0 5px #FF36C7}
+.legend-cube.steeljaw{background:#fff;box-shadow:0 0 5px #F4C542}.legend-cube.ravage{background:#29252F;box-shadow:0 0 6px #8B5CF6,0 0 10px #8B5CF688}.legend-cube.laserbeak{background:#17131A;box-shadow:0 0 5px #FF4B58}.legend-cube.ramhorn{background:#FF8A32;box-shadow:0 0 5px #FFF1D8}
+@media(max-width:430px){.board-layout{grid-template-columns:minmax(0,1fr) 96px;gap:6px}.board-wrap{width:100%}.game-sidebar{width:96px}.stat{padding:7px 4px}.stat-label{font-size:9px;letter-spacing:.4px}.stat-value{font-size:14px}.energon-stats{padding:7px 4px}.energon-heading{font-size:9px;letter-spacing:.4px}.next-title{font-size:9px;letter-spacing:.5px}.start-title-cube{flex-basis:42px;width:42px;height:42px}.legend{font-size:7px}}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>ENERGON CUBES</h1>
+  <div class="subtitle">MATCH • FORGE • CLEAR</div>
+</header>
+
+<main class="game-shell">
+  <section class="level-panel">
+    <div class="level-top"><span>ACTIVE TRANSMISSION</span><strong id="level-name">STEELJAW // AUTOBOT</strong></div>
+    <div class="level-progress"><div id="level-progress-fill"></div></div>
+    <div class="level-foot"><span id="level-number">LEVEL 1 OF 4</span><span id="next-threshold">NEXT: 2,500 PTS</span></div>
+  </section>
+  <div class="board-layout">
+    <div class="board-wrap">
+    <canvas id="game-canvas" width="240" height="480" aria-label="Energon Cubes game board"></canvas>
+    <div class="sword-slash" id="sword-slash" aria-hidden="true"><span>SWORD STYLE</span></div>
+    <div class="transform-overlay" id="transform-overlay" aria-hidden="true"><span>TRANSFORM</span><small>RECONFIGURING THE BOARD</small></div>
+    <div class="level-transition" id="level-transition" aria-live="polite">
+      <div class="transition-kicker" id="transition-kicker">INCOMING TRANSMISSION</div>
+      <div class="transition-name" id="transition-name">RAVAGE</div>
+      <div class="transition-sub" id="transition-sub">DECEPTICON // PANTHER</div>
+      <div class="transition-status" id="transition-status">LEVEL UNLOCKED</div>
+    </div>
+    <div class="screen-overlay show" id="start-screen">
+      <div class="over-card title-card">
+        <div class="eyebrow">TFvsWU ARCADE SYSTEM // ONLINE</div>
+        <div class="start-title-row"><h2 class="hero-title">ENERGON<br>CUBES</h2><span class="start-title-cube" aria-hidden="true"></span></div>
+        <p class="hero-copy">MATCH. FORGE. COLLECT.<br>SURVIVE THE CASSETTE WARZ.</p>
+        <div class="tape-roster"><span>01 STEELJAW</span><span>02 RAVAGE</span><span>03 LASERBEAK</span><span>04 RAMHORN</span></div>
+        <p class="instructions">Match 4 same-color blocks to forge an Energon Cube.<br>Match 4 Energon Cubes to collect them.<br>Milestones trigger Sword Style Shuffle &amp; Transform Remix.<br>Move: ← → · Drop: ↓ · Rotate: ↑ / SPACE · Pause: P</p>
+        <label class="callsign-label" for="player-name">PLAYER CALLSIGN</label>
+        <input id="player-name" class="callsign-input" type="text" maxlength="18" autocomplete="nickname" placeholder="ENTER CALLSIGN">
+        <p class="best-line">HIGH SCORE: <strong id="start-best-score">0</strong></p>
+        <button class="btn primary-btn" id="start-button">▶ START TRANSMISSION</button>
+      </div>
+    </div>
+    <div class="screen-overlay" id="win-screen">
+      <div class="over-card title-card">
+        <div class="eyebrow">ALL FOUR CASSETTES DEFEATED</div>
+        <h2 class="hero-title win-title">YOU WIN!</h2>
+        <p>YOU SURVIVED STEELJAW, RAVAGE, LASERBEAK &amp; RAMHORN.</p>
+        <p>The signal isn't over. The cassette warz continue...</p>
+        <p class="best-line">SCORE: <strong id="win-score">10,000</strong> · BEST: <strong id="win-best">0</strong></p>
+        <button class="btn primary-btn" id="continue-button">▶ CONTINUE TRANSMISSION</button>
+        <button class="btn secondary-btn" id="win-menu-button">MAIN MENU</button>
+      </div>
+    </div>
+    <div id="game-over">
+      <div class="over-card">
+        <h2>GAME OVER</h2>
+        <p>FINAL SCORE: <strong id="final-score">0</strong><br>ENERGON CUBES FORGED: <strong id="final-cubes">0</strong><br>BEST SCORE: <strong id="best-score">0</strong></p>
+        <button class="btn" id="restart">RESTART TRANSMISSION</button>
+        <button class="btn secondary-btn" id="gameover-menu-button">MAIN MENU</button>
+      </div>
+    </div>
+    </div>
+    <aside class="game-sidebar" aria-label="Score and game information">
+      <section class="hud" aria-label="Game statistics">
+        <div class="stat"><div class="stat-label">SCORE</div><div class="stat-value" id="score-val">0</div></div>
+        <div class="stat"><div class="stat-label">HIGH SCORE</div><div class="stat-value" id="high-score-val">0</div></div>
+      </section>
+      <section class="energon-stats"><div class="energon-heading">ENERGON CUBES</div><div class="energon-counts">
+        <div><span>CREATED</span><strong id="cube-created-val">0</strong></div>
+        <div><span>COLLECTED</span><strong id="cube-collected-val">0</strong></div>
+      </div></section>
+      <section class="next-panel"><div class="next-title">NEXT UP</div><canvas id="next-canvas" width="90" height="60"></canvas></section>
+    </aside>
+  </div>
+  <div id="message">Match 4 same-color blocks to forge Energon.</div>
+  <div class="controller-strip" aria-label="Game controls">
+    <button class="btn" id="btn-left" aria-label="Move left">◀ LEFT</button>
+    <button class="btn" id="btn-down" aria-label="Drop">▼ DROP</button>
+    <button class="btn" id="btn-right" aria-label="Move right">RIGHT ▶</button>
+    <button class="btn" id="btn-rot" aria-label="Rotate">↻ ROT</button>
+    <button class="btn pause-btn" id="btn-pause" aria-label="Pause game">Ⅱ PAUSE</button>
+  </div>
+  <div class="audio-controls" aria-label="Audio settings">
+    <button class="btn" id="mute-sounds" type="button" aria-pressed="false">🔊 MUTE SOUNDS</button>
+    <button class="btn" id="mute-beats" type="button" aria-pressed="false">🎵 MUTE BEATS</button>
+  </div>
+  <div class="legend" aria-label="Cube legend">
+    <div class="legend-line">
+      <span><i class="legend-cube gold"></i>SWORD STYLE</span>
+      <span><i class="legend-cube purple"></i>CONS</span>
+      <span><i class="legend-cube red"></i>BOTS</span>
+      <span><i class="legend-cube pink"></i>ENERGON CUBES</span>
+    </div>
+    <div class="legend-line">
+      <span><i class="legend-cube steeljaw"></i>TAPE 1</span>
+      <span><i class="legend-cube ravage"></i>TAPE 2</span>
+      <span><i class="legend-cube laserbeak"></i>TAPE 3</span>
+      <span><i class="legend-cube ramhorn"></i>TAPE 4</span>
+    </div>
+  </div>
+  <div class="footer">TFvsWU.COM // CASSETTE COMBAT PUZZLE PROTOCOL</div>
+</main>
+
+<script>
+(() => {
+"use strict";
+const canvas=document.getElementById("game-canvas"),ctx=canvas.getContext("2d");
+const nc=document.getElementById("next-canvas"),nctx=nc.getContext("2d");
+const $=id=>document.getElementById(id);
+const COLS=8,ROWS=16,SIZE=30;
+const COLORS={1:"#F4C542",2:"#6B168F",3:"#DC1247",4:"#FF36C7"};
+// Thresholds and speed values are intentionally more forgiving after playtest feedback.
+const LEVELS=[
+ {name:"STEELJAW",faction:"AUTOBOT",animal:"LION",min:0,max:1800,speed:42,every:10,glow:"#F4C542",accent:"#FFFFFF"},
+ {name:"RAVAGE",faction:"DECEPTICON",animal:"PANTHER",min:1800,max:4000,speed:38,every:9,glow:"#8B5CF6",accent:"#29252F"},
+ {name:"LASERBEAK",faction:"DECEPTICON",animal:"CONDOR",min:4000,max:7000,speed:34,every:8,glow:"#FF4B58",accent:"#17131A"},
+ {name:"RAMHORN",faction:"AUTOBOT",animal:"RHINO",min:7000,max:10000,speed:31,every:7,glow:"#FFF1D8",accent:"#FF8A32"}
+];
+const SWORD_MILESTONES=[1200,2800,4800,6800,8500,11000,13500,16000,18500,21000];
+const TRANSFORM_MILESTONES=[2300,5300,8300,12300,17300,22300];
+let nextTransformIndex=0;
+const grid=[];
+let score=0,created=0,collected=0,best=0,started=false,ended=false,paused=false,processing=false,intermission=false,won=false,chaos=false;
+let piece=null,nextPiece=null,locked=0,fall=0,currentLevel=0,nextSwordIndex=0,attackCount=0;
+let playerName="PLAYER";
+function cleanName(value){return String(value||"").trim().replace(/[^a-zA-Z0-9 _.-]/g,"").slice(0,18)||"PLAYER"}
+function bestKey(name){return "tfvswuEnergonBest:"+cleanName(name).toLowerCase()}
+function loadPlayer(){
+  try{playerName=cleanName(localStorage.getItem("tfvswuEnergonPlayer")||$("player-name").value||"PLAYER")}catch(e){playerName=cleanName($("player-name").value||"PLAYER")}
+  $("player-name").value=playerName;
+  try{best=Number(localStorage.getItem(bestKey(playerName))||0)}catch(e){best=0}
+  hud();
+}
+function freshGrid(){grid.length=0;for(let r=0;r<ROWS;r++)grid.push(Array(COLS).fill(0))}
+function randomPiece(){return{a:1+Math.floor(Math.random()*3),b:1+Math.floor(Math.random()*3)}}
+function getB(x,y,rot){return rot===0?{x:x+1,y}:rot===1?{x,y:y+1}:rot===2?{x:x-1,y}:{x,y:y-1}}
+function collides(x,y,rot){for(const p of [{x,y},getB(x,y,rot)]){if(p.x<0||p.x>=COLS||p.y>=ROWS)return true;if(p.y>=0&&grid[p.y][p.x]!==0)return true}return false}
+function drawNext(){nctx.clearRect(0,0,90,60);nctx.fillStyle="#0B0711";nctx.fillRect(0,0,90,60);if(!nextPiece)return;[nextPiece.a,nextPiece.b].forEach((v,i)=>{let x=17+i*30;nctx.fillStyle=COLORS[v];nctx.fillRect(x,15,26,26);nctx.fillStyle="rgba(255,255,255,.3)";nctx.fillRect(x+3,18,20,4);nctx.strokeStyle="#ffffff66";nctx.strokeRect(x+2,17,22,22)})}
+function levelIndex(){return score>=10000?3:score>=7000?3:score>=4000?2:score>=1800?1:0}
+function hud(){
+ $("score-val").textContent=score.toLocaleString();$("high-score-val").textContent=best.toLocaleString();
+ $("cube-created-val").textContent=created.toLocaleString();$("cube-collected-val").textContent=collected.toLocaleString();$("start-best-score").textContent=best.toLocaleString();
+ const i=chaos?3:levelIndex(),l=LEVELS[i];
+ $("level-name").textContent=chaos?"CHAOS MODE // ALL CASSETTES":`${l.name} // ${l.faction}`;
+ $("level-number").textContent=chaos?"ENDLESS CHAOS":`LEVEL ${i+1} OF 4`;
+ $("next-threshold").textContent=chaos?"RANDOM ATTACKS":i===3?"WIN AT 10,000 PTS":`NEXT: ${l.max.toLocaleString()} PTS`;
+ let pct=chaos?100:i===3?Math.min(100,((score-l.min)/(l.max-l.min))*100):Math.max(0,Math.min(100,(score-l.min)/(l.max-l.min)*100));
+ $("level-progress-fill").style.width=pct+"%";
+}
+function setMessage(t){$("message").textContent=t}
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+// Audio files are expected in ./audio/ with the exact uppercase filenames below.
+// Sound effects and background beats have independent mute controls.
+const AUDIO_BASE="audio/";
+let soundsMuted=false,beatsMuted=false,rotationSoundIndex=0,currentBeat=null,beatMode="levels",beatRequestToken=0;
+const sfxPlayers=new Map();
+function audioPath(name,ext){return AUDIO_BASE+name+"."+ext}
+function playSfx(name,ext="wav",onFinished=null){
+ if(soundsMuted)return null;
+ const key=name+"."+ext;
+ let pool=sfxPlayers.get(key);
+ if(!pool){pool=[];sfxPlayers.set(key,pool)}
+ let player=pool.find(a=>a.paused||a.ended);
+ if(!player){player=new Audio(audioPath(name,ext));player.preload="auto";pool.push(player)}
+ let finished=false;
+ const finish=()=>{if(finished)return;finished=true;if(typeof onFinished==="function")onFinished()};
+ player.onended=typeof onFinished==="function"?finish:null;
+ player.onerror=typeof onFinished==="function"?finish:null;
+ try{player.currentTime=0;player.volume=0.85;const result=player.play();if(result&&result.catch)result.catch(finish)}catch(e){finish()}
+ return player;
+}
+function stopBeat(){beatRequestToken++;if(currentBeat){currentBeat.onended=null;currentBeat.pause();try{currentBeat.currentTime=0}catch(e){}currentBeat=null}}
+function startBeat(name,loop=false,randomizeAfter=false){
+ stopBeat();beatMode=randomizeAfter?"levels":(name==="BEAT5"?"bonus":"fixed");
+ const token=beatRequestToken;
+ if(beatsMuted)return;
+ const audio=new Audio(audioPath(name,"mp3"));audio.preload="auto";audio.volume=0.48;audio.loop=loop;currentBeat=audio;
+ if(randomizeAfter){audio.onended=()=>{if(token===beatRequestToken&&!beatsMuted&&started&&!ended&&!intermission){playRandomLevelBeat(name)}}}
+ const result=audio.play();if(result&&result.catch)result.catch(()=>{});
+}
+function playRandomLevelBeat(previous=""){
+ if(beatsMuted||!started||ended||chaos&&intermission)return;
+ const options=["BEAT1","BEAT2","BEAT3","BEAT4"].filter(n=>n!==previous);
+ const pick=options[Math.floor(Math.random()*options.length)]||"BEAT1";
+ startBeat(pick,false,true);
+}
+function startLevelAudio(index){
+ const n=Math.max(1,Math.min(4,index+1));
+ stopBeat();
+ const beginBeat=()=>{if(started&&!ended&&!chaos)startBeat("BEAT"+n,false,true)};
+ if(soundsMuted){beginBeat();return}
+ playSfx("LVL"+n,"wav",beginBeat);
+}
+function toggleSounds(){
+ soundsMuted=!soundsMuted;
+ const b=$("mute-sounds");b.setAttribute("aria-pressed",String(soundsMuted));b.textContent=soundsMuted?"🔇 SOUNDS MUTED":"🔊 MUTE SOUNDS";
+}
+function toggleBeats(){
+ beatsMuted=!beatsMuted;
+ const b=$("mute-beats");b.setAttribute("aria-pressed",String(beatsMuted));b.textContent=beatsMuted?"🎵 BEATS MUTED":"🎵 MUTE BEATS";
+ if(beatsMuted){stopBeat()}else if(started&&!ended&&!intermission){if(chaos)startBeat("BEAT5",true,false);else if(currentLevel>=0)startBeat("BEAT"+(currentLevel+1),false,true)}
+}
+function showTransition(index){
+ const l=LEVELS[index];if(!l)return;
+ startLevelAudio(index);
+ $("transition-name").textContent=l.name;
+ $("transition-sub").textContent=`${l.faction} // ${l.animal}`;
+ const box=$("level-transition");
+ box.style.borderColor=l.glow;
+ $("transition-name").style.color=l.glow;
+ $("transition-name").style.textShadow=`0 0 8px ${l.glow},0 0 22px ${l.glow}`;
+ box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
+ setMessage(`TRANSMISSION ${index+1}: ${l.name} // ${l.animal}`);
+}
+function swordShuffle(){
+ // SWORD STYLE rearranges every regular block and Energon Cube across the whole board.
+ playSfx(Math.random()<0.5?"SWORDSTYLE":"SWORDSTYLE1");
+ // Enemy hazard blocks (values 5-8) stay locked in their original cells.
+ const movable=[];
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]<5)movable.push([r,c]);
+ const values=movable.map(([r,c])=>grid[r][c]);
+ for(let i=values.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [values[i],values[j]]=[values[j],values[i]];
+ }
+ movable.forEach(([r,c],i)=>grid[r][c]=values[i]);
+ const slash=$("sword-slash");slash.classList.remove("show");void slash.offsetWidth;slash.classList.add("show");
+ setMessage("SWORD STYLE! THE ENTIRE BOARD HAS BEEN REARRANGED!");
+}
+
+async function transformShuffle(){
+ playSfx(Math.random()<0.5?"TRANSFORMER1":"TRANSFORMER2");
+ const overlay=$("transform-overlay");
+ overlay.classList.remove("show");void overlay.offsetWidth;overlay.classList.add("show");
+ setMessage("TRANSFORM! FIVE-SHIFT BOARD RECONFIGURATION!");
+ for(let step=0;step<5;step++){
+  const values=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]!==0)values.push(grid[r][c]);
+  // Clear the board, then deal every block into a new random set of cells.
+  freshGrid();
+  const spots=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)spots.push([r,c]);
+  for(let i=spots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[spots[i],spots[j]]=[spots[j],spots[i]]}
+  values.forEach((v,i)=>{const [r,c]=spots[i];grid[r][c]=v});
+  await wait(280);
+ }
+ await wait(180);
+ overlay.classList.remove("show");
+}
+function checkTransformMilestones(oldScore,newScore){
+ let triggered=false;
+ while(nextTransformIndex<TRANSFORM_MILESTONES.length&&oldScore<TRANSFORM_MILESTONES[nextTransformIndex]&&newScore>=TRANSFORM_MILESTONES[nextTransformIndex]){
+  nextTransformIndex++;triggered=true;
+ }
+ if(chaos){
+  const last=TRANSFORM_MILESTONES[TRANSFORM_MILESTONES.length-1];
+  while(nextTransformIndex>=TRANSFORM_MILESTONES.length&&newScore>=last+5000*(nextTransformIndex-TRANSFORM_MILESTONES.length+1)&&nextTransformIndex<TRANSFORM_MILESTONES.length+20){
+   nextTransformIndex++;triggered=true;
+  }
+ }
+ return triggered;
+}
+
+function checkSwordMilestones(oldScore,newScore){
+ let triggered=false;
+ while(nextSwordIndex<SWORD_MILESTONES.length&&oldScore<SWORD_MILESTONES[nextSwordIndex]&&newScore>=SWORD_MILESTONES[nextSwordIndex]){
+  swordShuffle();nextSwordIndex++;triggered=true;
+ }
+ // After the listed milestones, continue triggering at 5,000-point intervals in Chaos Mode.
+ if(chaos){
+  const last=SWORD_MILESTONES[SWORD_MILESTONES.length-1];
+  while(newScore>=last+5000*(nextSwordIndex-SWORD_MILESTONES.length+1)&&nextSwordIndex<SWORD_MILESTONES.length+10){swordShuffle();nextSwordIndex++;triggered=true}
+ }
+ return triggered;
+}
+function spawn(){if(!started||ended||intermission)return;if(!nextPiece)nextPiece=randomPiece();piece={x:3,y:0,a:nextPiece.a,b:nextPiece.b,rot:0};nextPiece=randomPiece();drawNext();let b=getB(piece.x,piece.y,0);if(grid[0][3]||(b.y>=0&&grid[b.y][b.x]!==0))endGame()}
+function move(dx){if(started&&!processing&&!ended&&!paused&&!intermission&&piece&&!collides(piece.x+dx,piece.y,piece.rot))piece.x+=dx}
+function rotate(){if(started&&!processing&&!ended&&!paused&&!intermission&&piece&&!collides(piece.x,piece.y,(piece.rot+1)%4)){piece.rot=(piece.rot+1)%4;playSfx("ROT"+rotationSoundIndex);rotationSoundIndex=(rotationSoundIndex+1)%10}}
+function drop(){if(!started||processing||ended||paused||intermission||!piece)return;if(!collides(piece.x,piece.y+1,piece.rot))piece.y++;else lock()}
+function gravity(){let moved=false;for(let r=ROWS-2;r>=0;r--)for(let c=0;c<COLS;c++)if(grid[r][c]&&grid[r+1][c]===0){grid[r+1][c]=grid[r][c];grid[r][c]=0;moved=true}return moved}
+function findRuns(){let runs=[];for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;){let v=grid[r][c];if(v<1||v>4){c++;continue}let e=c+1;while(e<COLS&&grid[r][e]===v)e++;if(e-c>=4){let cells=[];for(let x=c;x<e;x++)cells.push([r,x]);runs.push({v,cells,anchor:[r,c]})}c=e}}for(let c=0;c<COLS;c++){for(let r=0;r<ROWS;){let v=grid[r][c];if(v<1||v>4){r++;continue}let e=r+1;while(e<ROWS&&grid[e][c]===v)e++;if(e-r>=4){let cells=[];for(let y=r;y<e;y++)cells.push([y,c]);runs.push({v,cells,anchor:[r,c]})}r=e}}return runs}
+function nearMatch(set,r,c){return [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].some(([y,x])=>y>=0&&y<ROWS&&x>=0&&x<COLS&&set.has(`${y},${x}`))}
+function saveBest(){if(score>best){best=score;try{localStorage.setItem(bestKey(playerName),String(best));localStorage.setItem("tfvswuEnergonPlayer",playerName)}catch(e){}}}
+async function resolveBoard(){
+ let guard=0;
+ while(!ended&&!intermission&&guard++<150){
+  let runs=findRuns();if(!runs.length){if(!gravity())break;await wait(65);continue}
+  for(const run of runs){const v=run.v;playSfx(v===1?"CLEARGOLD":v===2?"CLEARPURPLE":v===3?"CLEARRED":"ENERGONCUBE")}
+  let normal=new Set(),cubes=new Set(),anchors=new Map();
+  for(const run of runs){for(const [r,c] of run.cells)(run.v===4?cubes:normal).add(`${r},${c}`);if(run.v!==4)anchors.set(`${run.anchor[0]},${run.anchor[1]}`,run.anchor)}
+  const all=new Set([...normal,...cubes]);
+  for(const key of all){let [r,c]=key.split(",").map(Number);grid[r][c]=0}
+  let forged=0;for(const [r,c] of anchors.values())if(!cubes.has(`${r},${c}`)){grid[r][c]=4;forged++}
+  let cleared=0;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]>=5&&grid[r][c]<=8&&nearMatch(all,r,c)){grid[r][c]=0;cleared++}
+  created+=forged;collected+=cubes.size;
+  const oldScore=score;score+=normal.size*10+cubes.size*30+cleared*15;saveBest();hud();
+  const swordTriggered=checkSwordMilestones(oldScore,score);
+  const transformTriggered=checkTransformMilestones(oldScore,score);
+  setMessage(forged?`${forged} ENERGON CUBE${forged===1?"":"S"} FORGED!`:cubes.size?"ENERGON CUBES COLLECTED!":cleared?"TAPE INTERFERENCE CLEARED!":"MATCH CONFIRMED");
+  const idx=levelIndex();let transitioned=false;
+  if(!chaos&&idx!==currentLevel){
+    currentLevel=idx;showTransition(idx);transitioned=true;
+  }
+  // Hold the next falling pair until the visual event has had time to read.
+  await wait(transitioned?3300:(swordTriggered?2750:150));
+  if(transformTriggered)await transformShuffle();
+  gravity();await wait(100);
+  if(!chaos&&score>=10000&&!won){
+   won=true;intermission=true;piece=null;
+   $("win-score").textContent=score.toLocaleString();$("win-best").textContent=best.toLocaleString();
+   $("win-screen").classList.add("show");playSfx("WIN","mp3");stopBeat();setMessage("ALL FOUR TRANSMISSIONS CLEARED // YOU WIN!");break;
+  }
+ }
+ processing=false;
+ if(started&&!ended&&!intermission&&!paused){spawn();if(piece)maybeAttack()}
+}
+function addHazard(v){
+ const spots=[];for(let r=0;r<7;r++)for(let c=0;c<COLS;c++)if(!grid[r][c])spots.push([r,c]);
+ if(!spots.length)return;const [r,c]=spots[Math.floor(Math.random()*spots.length)];grid[r][c]=v;
+}
+function ramhornCharge(){
+ if(grid[0].some(v=>v)){endGame();return}
+ for(let r=0;r<ROWS-1;r++)for(let c=0;c<COLS;c++)grid[r][c]=grid[r+1][c];
+ grid[ROWS-1].fill(0);const hole=Math.floor(Math.random()*COLS);
+ for(let c=0;c<COLS;c++)if(c!==hole&&Math.random()<.55)grid[ROWS-1][c]=8;
+}
+function attack(){
+ const enemy=chaos?Math.floor(Math.random()*4):currentLevel;
+ if(enemy===0){addHazard(5);setMessage("STEELJAW: LION'S POUNCE // MATCH BESIDE THE HAZARD!")}
+ else if(enemy===1){addHazard(6);setMessage("RAVAGE: PANTHER AMBUSH // MATCH BESIDE THE HAZARD!")}
+ else if(enemy===2){addHazard(7);if(Math.random()<.25)addHazard(7);setMessage("LASERBEAK: SONIC SCAN // CLEAR NEARBY INTERFERENCE!")}
+ else{setMessage("RAMHORN: RHINO CHARGE!");ramhornCharge()}
+}
+function maybeAttack(){
+ const i=chaos?3:currentLevel;let every=LEVELS[i].every;
+ if(chaos)every=8;
+ if(locked>0&&locked%every===0)attack();
+}
+function lock(){
+ if(!piece||processing)return;
+ const b=getB(piece.x,piece.y,piece.rot);
+ if(piece.y>=0)grid[piece.y][piece.x]=piece.a;
+ if(b.y>=0)grid[b.y][b.x]=piece.b;
+ piece=null;processing=true;locked++;resolveBoard();
+}
+function endGame(){
+ ended=true;paused=false;intermission=false;piece=null;saveBest();
+ playSfx("LOSE","mp3");stopBeat();
+ $("final-score").textContent=score.toLocaleString();$("final-cubes").textContent=created.toLocaleString();$("best-score").textContent=best.toLocaleString();
+ $("game-over").classList.add("show");hud();setMessage("BOARD OVERLOAD // RUN IT BACK");
+}
+async function startGame(){
+ stopBeat();rotationSoundIndex=0;
+ const beginLevelOneAudio=()=>startLevelAudio(0);
+ playerName=cleanName($("player-name").value);$("player-name").value=playerName;
+ try{localStorage.setItem("tfvswuEnergonPlayer",playerName);best=Number(localStorage.getItem(bestKey(playerName))||0)}catch(e){best=0}
+ freshGrid();score=created=collected=locked=fall=0;started=true;ended=paused=processing=won=chaos=false;intermission=true;
+ currentLevel=0;nextSwordIndex=0;nextTransformIndex=0;attackCount=0;piece=null;nextPiece=randomPiece();
+ if(soundsMuted)beginLevelOneAudio();else playSfx("ENERGONCUBES1","wav",beginLevelOneAudio);
+ $("game-over").classList.remove("show");$("win-screen").classList.remove("show");$("start-screen").classList.remove("show");
+ $("btn-pause").textContent="Ⅱ PAUSE";$("sword-slash").classList.remove("show");$("transform-overlay").classList.remove("show");
+ // Opening title card: the cassette war transmission begins before the first piece drops.
+ $("transition-kicker").textContent="TFvsWU ARCADE SYSTEM";
+ $("transition-name").textContent="STEELJAW BEGIN";
+ $("transition-sub").textContent="LEVEL 1 // CASSETTE WARZ";
+ $("transition-status").textContent="TRANSMISSION STARTING";
+ $("transition-name").style.color="#FFF1D8";
+ $("transition-name").style.textShadow="0 0 8px #FFF1D8,0 0 22px #FF8A32";
+ const box=$("level-transition");box.style.borderColor="#FF8A32";
+ box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
+ drawNext();hud();setMessage("STEELJAW BEGIN // TRANSMISSION STARTING");
+ await wait(3300);
+ box.classList.remove("show");
+ $("transition-kicker").textContent="INCOMING TRANSMISSION";
+ $("transition-status").textContent="LEVEL UNLOCKED";
+ intermission=false;
+ spawn();setMessage("TRANSMISSION ACTIVE // STEELJAW DEPLOYED");
+}
+function continueChaos(){
+ intermission=false;chaos=true;currentLevel=3;$("win-screen").classList.remove("show");hud();
+ stopBeat();
+ const beginBonusBeat=()=>{if(started&&!ended&&chaos)startBeat("BEAT5",true,false)};
+ if(soundsMuted)beginBonusBeat();else playSfx("ENERGONCUBES2","wav",beginBonusBeat);
+ setMessage("CHAOS MODE ACTIVE // ALL FOUR CASSETTES ARE HUNTING YOU");spawn();
+}
+function menu(){
+ stopBeat();started=false;paused=false;intermission=false;piece=null;$("game-over").classList.remove("show");$("win-screen").classList.remove("show");
+ $("start-screen").classList.add("show");$("level-transition").classList.remove("show");$("sword-slash").classList.remove("show");$("transform-overlay").classList.remove("show");hud();setMessage("TRANSMISSION STANDBY // PRESS START WHEN READY");
+}
+function pause(){
+ if(!started||ended||intermission)return;
+ paused=!paused;
+ $("btn-pause").textContent=paused?"▶ RESUME":"Ⅱ PAUSE";
+ setMessage(paused?"TRANSMISSION PAUSED":"TRANSMISSION RESUMED");
+ if(!paused&&!processing&&!piece){
+  // A board-resolution routine may have finished during the pause; restore the next pair.
+  spawn();
+  if(piece)maybeAttack();
+ }
+}
+function drawCell(c,r,v){
+ const x=c*SIZE,y=r*SIZE;
+ if(v===4){
+  ctx.save();ctx.shadowColor="#FF36C7";ctx.shadowBlur=12;ctx.fillStyle="#B71D8F";ctx.fillRect(x+2,y+2,26,26);ctx.shadowBlur=0;
+  const g=ctx.createLinearGradient(x,y,x+SIZE,y+SIZE);g.addColorStop(0,"#FFB5F0");g.addColorStop(.45,"#FF36C7");g.addColorStop(1,"#C90091");
+  ctx.fillStyle=g;ctx.fillRect(x+5,y+5,20,20);ctx.strokeStyle="#FFE5FA";ctx.strokeRect(x+7,y+7,16,16);ctx.restore();return;
+ }
+ if(v>=5&&v<=8){
+  const styles={
+   5:{base:"#FFFFFF",glow:"#F4C542",edge:"#FFFBEA",hot:"#FFFFFF"},
+   6:{base:"#29252F",glow:"#8B5CF6",edge:"#6D28D9",hot:"#A78BFA"},
+   7:{base:"#19151D",glow:"#FF4B58",edge:"#E72B3A",hot:"#FF4B58"},
+   8:{base:"#FF8A32",glow:"#FFF1D8",edge:"#FFFFFF",hot:"#FFB35C"}
+  };
+  const s=styles[v];ctx.save();ctx.shadowColor=s.glow;ctx.shadowBlur=10;ctx.fillStyle=s.base;ctx.fillRect(x+2,y+2,26,26);ctx.shadowBlur=0;
+  ctx.strokeStyle=s.edge;ctx.lineWidth=1.5;ctx.strokeRect(x+4,y+4,22,22);
+  ctx.fillStyle=s.hot;ctx.globalAlpha=.65;ctx.fillRect(x+7,y+7,16,3);ctx.globalAlpha=1;ctx.restore();return;
+ }
+ ctx.save();ctx.shadowColor=v===1?"#FFF4B0":COLORS[v];ctx.shadowBlur=5;ctx.fillStyle=COLORS[v];ctx.fillRect(x+2,y+2,26,26);ctx.shadowBlur=0;
+ ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(x+4,y+4,22,4);ctx.strokeStyle="rgba(255,255,255,.35)";ctx.strokeRect(x+3,y+3,24,24);ctx.restore();
+}
+function draw(){
+ ctx.clearRect(0,0,240,480);ctx.fillStyle="#0B0711";ctx.fillRect(0,0,240,480);
+ ctx.strokeStyle="#6B168F33";for(let c=1;c<COLS;c++){ctx.beginPath();ctx.moveTo(c*SIZE,0);ctx.lineTo(c*SIZE,480);ctx.stroke()}
+ for(let r=1;r<ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*SIZE);ctx.lineTo(240,r*SIZE);ctx.stroke()}
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c])drawCell(c,r,grid[r][c]);
+ if(piece&&!ended&&!intermission){if(piece.y>=0)drawCell(piece.x,piece.y,piece.a);const b=getB(piece.x,piece.y,piece.rot);if(b.y>=0)drawCell(b.x,b.y,piece.b)}
+ if(paused&&!ended&&!intermission){ctx.fillStyle="#090510bb";ctx.fillRect(0,0,240,480);ctx.fillStyle="#FF36C7";ctx.textAlign="center";ctx.font="bold 22px Courier New";ctx.fillText("PAUSED",120,240)}
+ requestAnimationFrame(draw);
+}
+$("start-button").addEventListener("click",()=>{if(!started||ended)startGame()});$("continue-button").addEventListener("click",continueChaos);
+$("mute-sounds").addEventListener("click",toggleSounds);$("mute-beats").addEventListener("click",toggleBeats);
+$("win-menu-button").addEventListener("click",menu);$("gameover-menu-button").addEventListener("click",menu);
+$("btn-left").addEventListener("click",()=>move(-1));$("btn-right").addEventListener("click",()=>move(1));$("btn-down").addEventListener("click",drop);
+$("btn-rot").addEventListener("click",rotate);$("btn-pause").addEventListener("click",pause);$("restart").addEventListener("click",startGame);
+document.querySelectorAll(".btn").forEach(b=>b.addEventListener("contextmenu",e=>e.preventDefault()));
+window.addEventListener("keydown",e=>{
+ if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp"," "].includes(e.key))e.preventDefault();
+ if(e.key.toLowerCase()==="p"||e.key==="Escape"){pause();return}
+ if(e.key==="Enter"&&!started){startGame();return}
+ if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")move(-1);
+ if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")move(1);
+ if(e.key==="ArrowDown"||e.key.toLowerCase()==="s")drop();
+ if(e.key==="ArrowUp"||e.key===" "||e.key.toLowerCase()==="w")rotate();
+},{passive:false});
+function tick(){
+ if(started&&!processing&&!ended&&!paused&&!intermission&&piece){
+  fall++;let i=chaos?3:currentLevel;let speed=LEVELS[i].speed;
+  if(chaos)speed=Math.max(16,speed-Math.floor(Math.max(0,score-10000)/5000));
+  if(fall>=speed){fall=0;drop()}
+ }
+ setTimeout(tick,1000/30);
+}
+freshGrid();nextPiece=randomPiece();loadPlayer();drawNext();hud();setMessage("TRANSMISSION STANDBY // PRESS START WHEN READY");
+$("player-name").addEventListener("input",()=>{const name=cleanName($("player-name").value);try{best=Number(localStorage.getItem(bestKey(name))||0)}catch(e){best=0} $("start-best-score").textContent=best.toLocaleString()});
+$("player-name").addEventListener("keydown",e=>{if(e.key==="Enter"&&(!started||ended))startGame()});requestAnimationFrame(draw);tick();
+})();
+</script>
+</body>
+</html>

@@ -562,13 +562,13 @@ async function startGame(){
   spawn();setMessage("TRANSMISSION ACTIVE // STEELJAW DEPLOYED");
  };
  if(soundsMuted){showSteeljawIntro()}else{
-  const openingAudio=new Audio(audioPath("ENERGONCUBES1","wav"));
+  const openingAudio=new Audio(audioPath("ENRGONCUBES1","wav"));
   openingAudio.preload="auto";openingAudio.volume=0.85;
   let openingHandled=false;
   const openingError=()=>{
    if(openingHandled)return;openingHandled=true;
-   setMessage("AUDIO ERROR: CHECK audio/ENERGONCUBES1.wav FILENAME AND PATH");
-   console.error("Could not play opening audio:",audioPath("ENERGONCUBES1","wav"));
+   setMessage("AUDIO ERROR: CHECK audio/ENRGONCUBES1.wav FILENAME AND PATH");
+   console.error("Could not play opening audio:",audioPath("ENRGONCUBES1","wav"));
   };
   openingAudio.addEventListener("ended",()=>{if(openingHandled)return;openingHandled=true;showSteeljawIntro()},{once:true});
   openingAudio.addEventListener("error",openingError,{once:true});
@@ -583,7 +583,7 @@ function continueChaos(){
  intermission=false;chaos=true;currentLevel=3;$("win-screen").classList.remove("show");hud();
  stopBeat();
  const beginBonusBeat=()=>{if(started&&!ended&&chaos)startBeat("BEAT5",true,false)};
- if(soundsMuted)beginBonusBeat();else playSfx("ENERGONCUBES2","wav",beginBonusBeat);
+ if(soundsMuted)beginBonusBeat();else playSfx("ENRGONCUBES2","wav",beginBonusBeat);
  setMessage("CHAOS MODE ACTIVE // ALL FOUR CASSETTES ARE HUNTING YOU");spawn();
 }
 function menu(){
